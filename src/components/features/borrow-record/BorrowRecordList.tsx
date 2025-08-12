@@ -82,7 +82,7 @@ const BorrowRecordList = () => {
 
   useEffect(() => {
     fetchBorrowRecord()
-  }, [])
+  }, [fetchBorrowRecord])
 
   const getReturnBadge = (isReturned: boolean) => {
     return isReturned ? (

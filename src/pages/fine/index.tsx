@@ -32,7 +32,6 @@ import {
   ChevronDownIcon,
   MinusIcon,
 } from "lucide-react"
-import { useRouter } from "next/router"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import {
@@ -42,7 +41,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import fineGetFines from "@/hooks/api/fine/fine-get-fines"
+import useGetFines from "@/hooks/api/fine/fine-get-fines"
 import { usePayFine } from "@/hooks/api/fine/fine-pay-fine"
 import {
   showErrorToast,
@@ -68,7 +67,7 @@ const SORT_ICONS = {
 }
 
 const FinePage = () => {
-  const { data, error, isLoading } = fineGetFines()
+  const { data, error, isLoading } = useGetFines()
   console.log(data)
   const { payFine, loading: payLoading } = usePayFine()
   console.log("Raw data:", data)
@@ -81,7 +80,6 @@ const FinePage = () => {
   )
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [fineToDelete, setFineToDelete] = React.useState<Fine | null>(null)
-  const router = useRouter()
 
   // Filter and search
   const filtered = data?.filter((fine: Fine) => {
@@ -101,8 +99,8 @@ const FinePage = () => {
     return [...filtered].sort((a: Fine, b: Fine) => {
       for (const sort of sorts) {
         if (sort.direction === "none") continue
-        let aValue: any = (a as any)[sort.key]
-        let bValue: any = (b as any)[sort.key]
+        const aValue: any = (a as any)[sort.key]
+        const bValue: any = (b as any)[sort.key]
         if (aValue < bValue) return sort.direction === "asc" ? -1 : 1
         if (aValue > bValue) return sort.direction === "asc" ? 1 : -1
       }
@@ -134,11 +132,6 @@ const FinePage = () => {
     })
   }
 
-  const handleDeleteClick = (fine: Fine) => {
-    setFineToDelete(fine)
-    setDeleteDialogOpen(true)
-  }
-
   const handleConfirmDelete = async () => {
     // Implement delete logic here
     setDeleteDialogOpen(false)
@@ -151,7 +144,7 @@ const FinePage = () => {
       showSuccessToast("Thanh toán phạt thành công!")
       // Refresh the data
       window.location.reload()
-    } catch (error) {
+    } catch {
       showErrorToast("Thanh toán phạt thất bại!")
     }
   }

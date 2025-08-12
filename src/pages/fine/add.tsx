@@ -66,10 +66,9 @@ const AddFine = () => {
   const { addFine, loading } = useAddFine()
   const {
     data: usersData,
-    error: usersError,
     isLoading: usersLoading,
   } = useGetUsersV2()
-  const { data: booksData, error: booksError, isLoading: booksLoading } = useGetBooksV2()
+  const { isLoading: booksLoading } = useGetBooksV2()
 
   // Extract books from borrowRecords
   const books = (usersData as unknown as UserData)?.borrowRecords?.map((record: BorrowRecord) => record.book_id) || []
@@ -97,7 +96,7 @@ const AddFine = () => {
       await addFine({ data: submitData })
       showSuccessToast("Thêm phạt thành công!")
       router.push("/fine")
-    } catch (error) {
+    } catch {
       showErrorToast("Thêm phạt thất bại!")
     }
   }

@@ -26,15 +26,12 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select"
-import { usePayFine } from "@/hooks/api/fine/fine-pay-fine"
+
 import {
-  showErrorToast,
-  showSuccessToast,
+
 } from "@/components/common/toast/toast"
-import fineGetFines from "@/hooks/api/fine/fine-get-fines"
-import { useAtomValue } from "jotai/react"
-import { userInfoAtom } from "@/stores/auth"
-import fineGetFineByUser from "@/hooks/api/fine/fine-getbyuser"
+
+import useGetFineByUser from "@/hooks/api/fine/fine-getbyuser"
 
 const PAGE_SIZE = 10
 
@@ -47,9 +44,7 @@ const SORTABLE_COLUMNS = [
 ]
 
 const FineMember = () => {
-  const user = useAtomValue(userInfoAtom);
-  const { data, error, isLoading } = fineGetFineByUser()
-  const { payFine, loading: payLoading } = usePayFine()
+  const { data, error, isLoading } = useGetFineByUser()
   const [page, setPage] = React.useState(1)
   const [search, setSearch] = React.useState("")
   const [status, setStatus] = React.useState("all")

@@ -13,29 +13,16 @@ interface ReviewFormProps {
   onSubmit?: (review: { rating: number; comment: string }) => void;
 }
 
-const getUserData = (borrowData: any[]) => {
-  if (!borrowData || borrowData.length === 0) return null;
-  
-  // Lấy thông tin user từ mục đầu tiên (vì tất cả đều cùng một user)
-  const firstBorrow = borrowData[0];
-  return {
-    _id: firstBorrow.user_id._id,
-    full_name: firstBorrow.user_id.full_name,
-    email: firstBorrow.user_id.email
-  };
-};
-
 export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { data: userReviews, isLoading: isLoadingUserReviews } = reviewsGetByUserId(bookId);
+  const { data: userReviews } = reviewsGetByUserId(bookId);
   const { data: allReviews, isLoading: isLoadingAllReviews } = reviewsGetReviews(bookId);
   const { addReview, loading: adding } = useAddReview();
   const { updateReview, loading: updating } = useUpdateReview(editingReview?._id || "");
   const { deleteReview, loading: deleting } = useDeleteReview();
-  console.log(bookId)
   const handleSubmit = async () => {
     try {
       if (!rating) {
@@ -269,6 +256,7 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
                         </button>
                         <button
                           onClick={() => handleDelete(review._id)}
+                          disabled={deleting}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

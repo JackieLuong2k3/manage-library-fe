@@ -58,7 +58,7 @@ const InventoryPage = () => {
 
   // Process books data to include category names
   const books: BookWithCategory[] =
-    booksData?.map((book) => ({
+    booksData?.books?.map((book) => ({
       ...book,
       categoryName:
         categories?.find((cat) => cat._id === book.category_id)?.name ||

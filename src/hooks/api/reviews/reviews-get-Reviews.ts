@@ -2,17 +2,8 @@ import { Endpoints } from "@/lib/endpoints"
 import { axiosFetcher } from "@/lib/utils"
 import useSWR from "swr"
 
-interface User {
-  _id: string
-  full_name: string
-  email: string
-}
 
-interface Book {
-  _id: string
-  title: string
-  author: string
-}
+
 
 export interface Review {
   _id: string
@@ -24,7 +15,7 @@ export interface Review {
   __v: number
 }
 
-const reviewsGetReviews = (id: string) => {
+const useGetReviews = (id: string) => {
   const { data, error, isLoading } = useSWR<Review[]>(
     Endpoints.Review.GET_ALL(id),
     axiosFetcher,
@@ -33,4 +24,4 @@ const reviewsGetReviews = (id: string) => {
   return { data, error, isLoading }
 }
 
-export default reviewsGetReviews
+export default useGetReviews

@@ -38,7 +38,7 @@ export interface Fine {
   __v: number
 }
 
-const fineGetFineByUser = () => {
+const useGetFineByUser = () => {
   const { data, error, isLoading } = useSWR<Fine[]>(
     Endpoints.Fine.GET_BY_USER,
     axiosFetcher,
@@ -46,4 +46,4 @@ const fineGetFineByUser = () => {
   return { data, error, isLoading }
 }
 
-export default fineGetFineByUser
+export default useGetFineByUser

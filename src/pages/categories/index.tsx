@@ -87,8 +87,8 @@ const CategoryPage = () => {
     return [...filtered].sort((a: any, b: any) => {
       for (const sort of sorts) {
         if (sort.direction === "none") continue
-        let aValue: any = (a as any)[sort.key]
-        let bValue: any = (b as any)[sort.key]
+        const aValue: any = (a as any)[sort.key]
+        const bValue: any = (b as any)[sort.key]
         if (aValue < bValue) return sort.direction === "asc" ? -1 : 1
         if (aValue > bValue) return sort.direction === "asc" ? 1 : -1
       }

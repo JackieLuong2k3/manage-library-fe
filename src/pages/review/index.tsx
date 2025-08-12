@@ -16,11 +16,11 @@ export default function ReviewForm({ bookId = "680298de917372c550c93466", onSubm
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
   const [editingReview, setEditingReview] = useState<Review | null>(null);
-  const { data: userReviews, isLoading: isLoadingUserReviews } = reviewsGetByUserId(bookId);
+  const { data: userReviews } = reviewsGetByUserId(bookId);
   const { data: allReviews, isLoading: isLoadingAllReviews } = reviewsGetReviews(bookId);
   const { addReview, loading: adding } = useAddReview();
   const { updateReview, loading: updating } = useUpdateReview(editingReview?._id || "");
-  const { deleteReview, loading: deleting } = useDeleteReview();
+  const { deleteReview } = useDeleteReview();
 
   const handleSubmit = async () => {
     try {

@@ -31,10 +31,8 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/common/toast/toast"
-import fineGetFines from "@/hooks/api/fine/fine-get-fines"
-import { useAtomValue } from "jotai/react"
-import { userInfoAtom } from "@/stores/auth"
-import fineGetFineByUser from "@/hooks/api/fine/fine-getbyuser"
+
+import useGetFineByUser from "@/hooks/api/fine/fine-getbyuser"
 
 const PAGE_SIZE = 10
 
@@ -47,8 +45,7 @@ const SORTABLE_COLUMNS = [
 ]
 
 const FineAdmin = () => {
-  const user = useAtomValue(userInfoAtom);
-  const { data, error, isLoading } = fineGetFineByUser()
+  const { data, error, isLoading } = useGetFineByUser()
   const { payFine, loading: payLoading } = usePayFine()
   const [page, setPage] = React.useState(1)
   const [search, setSearch] = React.useState("")
@@ -59,7 +56,7 @@ const FineAdmin = () => {
       await payFine(id)
       showSuccessToast("Thanh toán phạt thành công!")
       window.location.reload()
-    } catch (error) {
+    } catch {
       showErrorToast("Thanh toán phạt thất bại!")
     }
   }

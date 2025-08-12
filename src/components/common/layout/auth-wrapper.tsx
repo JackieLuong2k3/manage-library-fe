@@ -14,14 +14,15 @@ interface AuthWrapperProps {
 const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const router = useRouter();
   const userData = useAtomValue(userInfoAtom);
+  const { pathname, replace } = router;
 
   useEffect(() => {
     const token = localStorage.getItem(Constants.API_TOKEN_KEY);
-    const isLoginPage = router.pathname === "/login";
-    const isRegisterPage = router.pathname === "/register";
+    const isLoginPage = pathname === "/login";
+    const isRegisterPage = pathname === "/register";
     if (!token) {
       if (!isLoginPage && !isRegisterPage) {
-        router.replace("/login");
+        replace("/login");
       }
       return;
     }
@@ -31,17 +32,17 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
       if (Date.now() >= exp * 1000) {
         localStorage.removeItem(Constants.API_TOKEN_KEY);
         if (!isLoginPage && !isRegisterPage) {
-          router.replace("/login");
+          replace("/login");
         }
       } else {
         if (isLoginPage || isRegisterPage) {
-          router.replace("/dashboard");
+          replace("/dashboard");
         }
       }
     } catch {
       logout();
     }
-  }, [router.pathname]);
+  }, [pathname, replace]);
 
   return (
     <>
