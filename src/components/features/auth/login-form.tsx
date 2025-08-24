@@ -54,6 +54,8 @@ export function LoginForm({
             Constants.API_TOKEN_KEY,
             response.data.accessToken,
           );
+          // Lưu user info vào localStorage để persist data
+          localStorage.setItem("userInfo", JSON.stringify(response.data.user));
           setUserAtom(response.data.user);
           router.push("/dashboard");
         }

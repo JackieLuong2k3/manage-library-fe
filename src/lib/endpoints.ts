@@ -1,4 +1,4 @@
-const BASE_URL = "https://manage-library-be.onrender.com/api"
+const BASE_URL = "http://localhost:5678/api"
 
 export class Endpoints {
   static readonly Auth = {
@@ -46,5 +46,25 @@ export class Endpoints {
     CREATE: `${BASE_URL}/categories`,
     UPDATE: (id: string) => `${BASE_URL}/categories/${id}`,
     DELETE: (id: string) => `${BASE_URL}/categories/${id}`,
+  }
+  static readonly BorrowRequest = {
+    GET_ALL: `${BASE_URL}/borrow-requests`,
+    GET_BY_ID: (id: string) => `${BASE_URL}/borrow-requests/${id}`,
+    CREATE: `${BASE_URL}/borrow-requests`,
+    UPDATE: (id: string) => `${BASE_URL}/borrow-requests/${id}`,
+    DELETE: (id: string) => `${BASE_URL}/borrow-requests/${id}`,
+    GET_MY_REQUESTS: `${BASE_URL}/borrow-requests/my-requests`,
+    APPROVE: (id: string) => `${BASE_URL}/borrow-requests/${id}/approve`,
+    REJECT: (id: string) => `${BASE_URL}/borrow-requests/${id}/reject`,
+  }
+  static readonly BorrowRecord = {
+    GET_ALL: `${BASE_URL}/borrow-records`,
+    GET_BY_ID: (id: string) => `${BASE_URL}/borrow-records/${id}`,
+    CREATE: `${BASE_URL}/borrow-records`,
+    UPDATE: (id: string) => `${BASE_URL}/borrow-records/${id}`,
+    DELETE: (id: string) => `${BASE_URL}/borrow-records/${id}`,
+    GET_MY_RECORDS: `${BASE_URL}/borrow-records/my-records`,
+    RETURN_BOOK: (id: string) => `${BASE_URL}/borrow-records/${id}/return`,
+    GET_BY_BOOK_ID: (bookId: string) => `${BASE_URL}/borrow-records/book/${bookId}`,
   }
 }

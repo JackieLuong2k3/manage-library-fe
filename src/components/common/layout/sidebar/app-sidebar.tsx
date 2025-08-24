@@ -96,7 +96,7 @@ const data = {
       url: "/inventory",
       icon: Library,
       title: "Kho sách",
-      role: ["admin", "staff", "member"],
+      role: ["member"],
     },
     {
       name: "Fines",
