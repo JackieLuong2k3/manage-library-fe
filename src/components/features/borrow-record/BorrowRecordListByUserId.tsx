@@ -53,7 +53,6 @@ const DatePicker = ({ date, onChange }: { date: Date | undefined; onChange: (dat
 const BorrowRecordListByUserId = () => {
   const { fetchBorrowRecordByUserId, borrowRecords, loading } = useGetBorrowRecordByUserId()
 
-  console.log("fetchBorrowRecordByUserId",fetchBorrowRecordByUserId)
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [startDate, setStartDate] = useState<Date>()
   const [endDate, setEndDate] = useState<Date>()
