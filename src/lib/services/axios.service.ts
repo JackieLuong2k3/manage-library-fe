@@ -36,6 +36,31 @@ class AxiosService {
         if (error.response?.status === 401) {
           return this.handle401Error(error);
         }
+        
+        // Xử lý các lỗi HTTP khác (400, 500, etc.)
+        if (error.response) {
+          const { status, data } = error.response;
+          
+          if (status === 400) {
+            // Log để debug
+            console.log("Handling 400 error:", { status, data });
+            console.log("Full error response:", error.response);
+            
+            // Để axios xử lý error gốc, không tạo FailureResponse
+            // Component sẽ xử lý error.response.data.message trực tiếp
+          }
+          
+          if (status >= 500) {
+            // Tạo FailureResponse cho lỗi server
+            const failureResponse = new FailureResponse({
+              code: status.toString(),
+              message: data?.message || "Internal Server Error",
+              success: false,
+            });
+            return Promise.reject(failureResponse);
+          }
+        }
+        
         return Promise.reject(error);
       },
     );
@@ -55,9 +80,11 @@ class AxiosService {
       }
 
       case 400: {
+        // Đảm bảo message lỗi từ backend được truyền đúng cách
+        const errorMessage = response.data?.message || "Request failed.";
         const failureResponse = new FailureResponse({
           code: response.status.toString(),
-          message: response.data.message || "Request failed.",
+          message: errorMessage,
           success: false,
         });
         return Promise.reject(failureResponse);

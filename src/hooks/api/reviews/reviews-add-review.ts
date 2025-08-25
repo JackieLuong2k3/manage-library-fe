@@ -21,6 +21,7 @@ const useAddReview = () => {
       await mutate(Endpoints.Review.GET_ALL(data.book_id))
       return response.data
     } catch (error) {
+      console.log("Hook addReview caught error:", error)
       throw error
     } finally {
       setLoading(false)

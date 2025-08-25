@@ -51,10 +51,25 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
       // Mutate both user reviews and all reviews
       mutate(Endpoints.Review.GET_BY_USER_BY_BOOK_ID(bookId));
       mutate(Endpoints.Review.GET_ALL(bookId));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding review:", error);
-      setError("Có lỗi xảy ra khi thêm đánh giá. Vui lòng thử lại sau.");
-      toast.error("Có lỗi xảy ra khi thêm đánh giá");
+    
+      
+      // Hiển thị message lỗi cụ thể từ backend nếu có
+      let errorMessage = "Có lỗi xảy ra khi thêm đánh giá. Vui lòng thử lại sau.";
+      
+      // Debug: Log toàn bộ cấu trúc error để xem
+      console.log("Error response data:", error?.response?.data?.message);
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+        console.log("Using error.response.data.message:", errorMessage);
+      } else {
+        console.log("No specific error message found, using default");
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -62,14 +77,32 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
     setEditingReview(review);
     setRating(review.rating);
     setComment(review.comment);
+    setError(null); // Clear error when starting to edit
   };
 
   const handleUpdate = async () => {
-    if (editingReview) {
-      await updateReview({ rating, comment });
-      setEditingReview(null);
-      setRating(0);
-      setComment("");
+    try {
+      if (editingReview) {
+        await updateReview({ rating, comment });
+        setEditingReview(null);
+        setRating(0);
+        setComment("");
+        setError(null);
+        toast.success("Đánh giá đã được cập nhật thành công");
+      }
+    } catch (error: any) {
+      console.error("Error updating review:", error);
+      
+      let errorMessage = "Có lỗi xảy ra khi cập nhật đánh giá. Vui lòng thử lại sau.";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -77,8 +110,21 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
     try {
       await deleteReview(reviewId);
       setEditingReview(null);
-    } catch (error) {
+      setError(null);
+      toast.success("Đánh giá đã được xóa thành công");
+    } catch (error: any) {
       console.error("Error deleting review:", error);
+      
+      let errorMessage = "Có lỗi xảy ra khi xóa đánh giá. Vui lòng thử lại sau.";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -91,8 +137,6 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
   return (
     <section className="py-8 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Add/Edit Review Form */}
-        { userReviews?.length === 0 && !editingReview && allReviews && allReviews.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
             <div className="flex items-start space-x-4">
               <img
@@ -149,9 +193,8 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
               </div>
             </div>
           </div>
-        )}
+        
 
-        {/* Edit Review Form */}
         {editingReview && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
             <div className="flex items-start space-x-4">
@@ -164,6 +207,11 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
                 <h3 className="text-xl font-semibold mb-3">
                   Edit your review
                 </h3>
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg">
+                    {error}
+                  </div>
+                )}
                 <div className="flex mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -188,6 +236,7 @@ export default function ReviewForm({ bookId, onSubmit }: ReviewFormProps) {
                       setEditingReview(null);
                       setRating(0);
                       setComment("");
+                      setError(null);
                     }}
                     className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                   >

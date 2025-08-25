@@ -20,8 +20,6 @@ const useGetReviewsByUserId = (book_id: string) => {
     Endpoints.Review.GET_BY_USER_BY_BOOK_ID(book_id),
     axiosFetcher,
   )
-  console.log('data', data);
-
   return { data, error, isLoading }
 }
 

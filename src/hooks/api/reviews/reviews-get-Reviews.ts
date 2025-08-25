@@ -20,7 +20,6 @@ const useGetReviews = (id: string) => {
     Endpoints.Review.GET_ALL(id),
     axiosFetcher,
   )
-  console.log(data);
   return { data, error, isLoading }
 }
 
