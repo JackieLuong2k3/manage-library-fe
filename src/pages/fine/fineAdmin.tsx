@@ -26,17 +26,33 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  PlusIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MinusIcon,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import useGetFines from "@/hooks/api/fine/fine-get-fines"
 import { usePayFine } from "@/hooks/api/fine/fine-pay-fine"
 import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/common/toast/toast"
-
-import useGetFineByUser from "@/hooks/api/fine/fine-getbyuser"
+import { Fine } from "@/hooks/api/fine/fine-get-fines"
 
 const PAGE_SIZE = 10
 
 const SORTABLE_COLUMNS = [
+  { key: "user_name", label: "Tên hội viên" },
   { key: "book_title", label: "Tên sách" },
   { key: "amount", label: "Số tiền phạt" },
   { key: "reason", label: "Lý do phạt" },
@@ -44,57 +60,105 @@ const SORTABLE_COLUMNS = [
   { key: "issued_date", label: "Ngày tạo" },
 ]
 
-const FineAdmin = () => {
-  const { data, error, isLoading } = useGetFineByUser()
+const SORT_ICONS = {
+  asc: <ChevronDownIcon className="size-4 inline ml-1" />,
+  desc: <ChevronUpIcon className="size-4 inline ml-1" />,
+  none: <MinusIcon className="size-4 inline ml-1" />,
+}
+
+const FinePage = () => {
+  const { data, error, isLoading } = useGetFines()
+  console.log(data)
   const { payFine, loading: payLoading } = usePayFine()
+  console.log("Raw data:", data)
+ 
   const [page, setPage] = React.useState(1)
   const [search, setSearch] = React.useState("")
   const [status, setStatus] = React.useState("all")
+  const [sorts, setSorts] = React.useState(
+    [] as { key: string; direction: "asc" | "desc" | "none" }[],
+  )
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+  const [fineToDelete, setFineToDelete] = React.useState<Fine | null>(null)
+
+  // Filter and search
+  const filtered = data?.filter((fine: Fine) => {
+    const matchesSearch =
+      (fine.user_id?.email?.toLowerCase().includes(search.toLowerCase()) || 
+      (fine.borrow_record_id?.book_id?.title || fine.book_id?.title)?.toLowerCase().includes(search.toLowerCase())
+    ) 
+    const matchesStatus = status === "all" ? true : 
+      status === "false" ? !fine.is_paid :
+      status === "true" ? fine.is_paid : false
+    return matchesSearch && matchesStatus
+  })
+
+  // Multi-column sort logic
+  const sorted = React.useMemo(() => {
+    if (!filtered || sorts.length === 0) return filtered
+    return [...filtered].sort((a: Fine, b: Fine) => {
+      for (const sort of sorts) {
+        if (sort.direction === "none") continue
+        const aValue: any = (a as any)[sort.key]
+        const bValue: any = (b as any)[sort.key]
+        if (aValue < bValue) return sort.direction === "asc" ? -1 : 1
+        if (aValue > bValue) return sort.direction === "asc" ? 1 : -1
+      }
+      return 0
+    })
+  }, [filtered, sorts])
+
+  const total = sorted?.length || 0
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+  const paginated = sorted?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  React.useEffect(() => {
+    setPage(1)
+  }, [search, status])
+
+  // Toggle sort for a column
+  const handleSort = (key: string) => {
+    setSorts((prev) => {
+      const existing = prev.find((s) => s.key === key)
+      let direction: "asc" | "desc" | "none" = "asc"
+      if (existing) {
+        if (existing.direction === "asc") direction = "desc"
+        else if (existing.direction === "desc") direction = "none"
+        else direction = "asc"
+        if (direction === "none") return prev.filter((s) => s.key !== key)
+        return prev.map((s) => (s.key === key ? { ...s, direction } : s))
+      }
+      return [...prev, { key, direction }]
+    })
+  }
+
+  const handleConfirmDelete = async () => {
+    // Implement delete logic here
+    setDeleteDialogOpen(false)
+    setFineToDelete(null)
+  }
 
   const handlePayment = async (id: string) => {
     try {
       await payFine(id)
       showSuccessToast("Thanh toán phạt thành công!")
+      // Refresh the data
       window.location.reload()
     } catch {
       showErrorToast("Thanh toán phạt thất bại!")
     }
   }
 
-  // Filter and search
-  const filtered = data?.filter((fine) => {
-    const matchesSearch =
-      fine.borrow_record_id?.book_id?.title?.toLowerCase().includes(search.toLowerCase()) || false
-    const matchesStatus = status === "all" ? true :
-      status === "false" ? !fine.is_paid :
-        status === "true" ? fine.is_paid : false
-    return matchesSearch && matchesStatus
-  })
-
-  const total = filtered?.length || 0
-  const totalPages = Math.ceil(total / PAGE_SIZE)
-  const paginated = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-
-  React.useEffect(() => {
-    setPage(1)
-  }, [search, status])
-
-  if (isLoading) {
-    return <div>Đang tải...</div>
-  }
-
-  if (error) {
-    return <div>Có lỗi xảy ra khi tải dữ liệu</div>
-  }
-
-  if (!data || data.length === 0) {
-    return <div>Không có phạt nào.</div>
-  }
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Danh sách phạt của tôi</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Danh sách phạt</CardTitle>
+          <Button>
+            <PlusIcon />
+            <Link href="/fine/add">Thêm phạt</Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
@@ -102,7 +166,7 @@ const FineAdmin = () => {
             <Label htmlFor="search">Tìm kiếm</Label>
             <Input
               id="search"
-              placeholder="Tìm theo tên sách..."
+              placeholder="Tìm theo tên hội viên, tên sách..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="mt-1"
@@ -126,47 +190,78 @@ const FineAdmin = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>STT</TableHead>
-              {SORTABLE_COLUMNS.map((col) => (
-                <TableHead key={col.key}>{col.label}</TableHead>
-              ))}
-              <TableHead>Hành động</TableHead>
+              <TableHead className="bg-white text-black">STT</TableHead>
+              {SORTABLE_COLUMNS.map((col) => {
+                const sort = sorts.find((s) => s.key === col.key)
+                const icon = sort ? SORT_ICONS[sort.direction] : SORT_ICONS.none
+                return (
+                  <TableHead
+                    key={col.key}
+                    className="cursor-pointer select-none bg-white text-black"
+                    onClick={() => handleSort(col.key)}
+                  >
+                    {col.label} {icon}
+                  </TableHead>
+                )
+              })}
+              <TableHead className="bg-white text-black">Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginated?.map((fine, idx) => (
-              <TableRow key={fine._id}>
-                <TableCell>{(page - 1) * PAGE_SIZE + idx + 1}</TableCell>
-                <TableCell>{fine.borrow_record_id?.book_id?.title || "N/A"}</TableCell>
-                <TableCell>{fine.amount.toLocaleString("vi-VN")} VNĐ</TableCell>
-                <TableCell>{fine.reason}</TableCell>
-                <TableCell>
-                  {fine.is_paid ? (
-                    <Badge variant="default" className="bg-green-600">
-                      Đã thanh toán
-                    </Badge>
-                  ) : (
-                    <Badge variant="default" className="bg-yellow-600">
-                      Chờ thanh toán
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {new Date(fine.issued_date).toLocaleDateString("vi-VN")}
-                </TableCell>
-                <TableCell>
-                  {!fine.is_paid && (
-                    <button
-                      onClick={() => handlePayment(fine._id)}
-                      disabled={payLoading}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Thanh toán
-                    </button>
-                  )}
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">
+                  Đang tải...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">
+                  Có lỗi xảy ra khi tải dữ liệu
+                </TableCell>
+              </TableRow>
+            ) : !data || data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">
+                  Không có phạt nào.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginated?.map((fine: Fine, idx: number) => (
+                <TableRow key={fine._id}>
+                  <TableCell>{(page - 1) * PAGE_SIZE + idx + 1}</TableCell>
+                  <TableCell>{fine.user_id?.email || "N/A"}</TableCell>
+                  <TableCell>{fine.borrow_record_id?.book_id?.title || fine.book_id?.title || "N/A"}</TableCell>
+                  <TableCell>{fine.amount.toLocaleString("vi-VN")} VNĐ</TableCell>
+                  <TableCell>{fine.reason}</TableCell>
+                  <TableCell>
+                    {fine.is_paid ? (
+                      <Badge variant="default" className="bg-green-600">
+                        Đã thanh toán
+                      </Badge>
+                    ) : (
+                      <Badge variant="default" className="bg-yellow-600">
+                        Chờ thanh toán
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(fine.issued_date).toLocaleDateString("vi-VN")}
+                  </TableCell>
+                  <TableCell>
+                    {!fine.is_paid && (
+                      <button
+                        onClick={() => handlePayment(fine._id)}
+                        disabled={payLoading}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        Xác nhận thanh toán
+                      </button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
 
@@ -211,10 +306,35 @@ const FineAdmin = () => {
           </Pagination>
         )}
       </CardContent>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa phạt</DialogTitle>
+          </DialogHeader>
+          <div>
+            Bạn có chắc chắn muốn xóa phạt của hội viên <b>{fineToDelete?.user_id?.email}</b>{" "}
+            không?
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+            >
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
-
-
   )
 }
 
-export default FineAdmin
+export default FinePage
+

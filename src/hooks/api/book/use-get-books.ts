@@ -19,11 +19,12 @@ export interface Book {
 }
 
 const useGetBooks = () => {
-  const { data, error, isLoading } = useSWR<Book[]>(
+  const { data, error, isLoading } = useSWR<any>(
     Endpoints.Books.GET_ALL,
     axiosFetcher,
   )
-  return { data, error, isLoading }
+  const books: Book[] = data?.books ?? data ?? []
+  return { data: books, error, isLoading }
 }
 
 export default useGetBooks 

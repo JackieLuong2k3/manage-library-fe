@@ -14,19 +14,14 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import useAddFine from "@/hooks/api/fine/fine-add-fine"
-import useGetUsersV2 from "@/hooks/api/user/use-get-users-v2"
+import useGetUserById from "@/hooks/api/user/use-get-user-by-id"
+import useGetBooks from "@/hooks/api/book/use-get-books"
 import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/common/toast/toast"
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select"
-import useGetBooksV2 from "@/hooks/api/book/use-get-books-v2"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 interface Book {
   _id: string;
@@ -37,20 +32,7 @@ interface Book {
 interface BorrowRecord {
   _id: string;
   book_id: Book;
-  user_id: {
-    _id: string;
-    full_name: string;
-    email: string;
-  };
-}
-
-interface UserData {
-  userDetails: Array<{
-    _id: string;
-    full_name: string;
-    identity_number: string;
-  }>;
-  borrowRecords: BorrowRecord[];
+  user_id: string;
 }
 
 const formSchema = z.object({
@@ -64,25 +46,31 @@ const formSchema = z.object({
 const AddFine = () => {
   const router = useRouter()
   const { addFine, loading } = useAddFine()
-  const {
-    data: usersData,
-    isLoading: usersLoading,
-  } = useGetUsersV2()
-  const { isLoading: booksLoading } = useGetBooksV2()
-
-  // Extract books from borrowRecords
-  const books = (usersData as unknown as UserData)?.borrowRecords?.map((record: BorrowRecord) => record.book_id) || []
+  const userId = (router.query.userId as string) || ""
+  const { data: userDetail } = useGetUserById(userId)
+  const { data: allBooks } = useGetBooks()  
+  console.log("allBooks  ",allBooks)
+  const [bookPopoverOpen, setBookPopoverOpen] = React.useState(false)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      user_id: "",
+      user_id: userId,
       book_id: "",
       amount: 0,
       reason: "",
       is_paid: false,
     },
   })
+
+  // Build books list from not-returned borrow records of this use
+
+  // Ensure user_id stays in sync if query changes
+  React.useEffect(() => {
+    if (userId) {
+      form.setValue("user_id", userId)
+    }
+  }, [userId])
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -115,22 +103,10 @@ const AddFine = () => {
             <FormItem>
               <FormLabel>Hội viên</FormLabel>
               <FormControl>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={usersLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn hội viên" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(usersData as unknown as UserData)?.userDetails?.map((user) => (
-                      <SelectItem key={user._id} value={user._id}>
-                        {user.full_name} - {user.identity_number}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <>
+                  <Input placeholder="Nhập hội viên" value={userDetail?.full_name || ""} disabled />
+                  <input type="hidden" {...field} value={userId} />
+                </>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -143,22 +119,35 @@ const AddFine = () => {
             <FormItem>
               <FormLabel>Sách</FormLabel>
               <FormControl>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={booksLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn sách" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {books.map((book) => (
-                      <SelectItem key={book._id} value={book._id}>
-                        {book.title} - {book.author}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={bookPopoverOpen} onOpenChange={setBookPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button type="button" variant="outline" className="w-full justify-between">
+                      {allBooks?.find((b: any) => b._id === field.value)?.title || "Chọn sách"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
+                    <Command>
+                      <CommandInput placeholder="Tìm sách..." />
+                      <CommandList>
+                        <CommandEmpty>Không tìm thấy sách.</CommandEmpty>
+                        <CommandGroup>
+                          {(allBooks || []).map((book: any) => (
+                            <CommandItem
+                              key={book._id}
+                              value={`${book.title} ${book.author}`}
+                              onSelect={() => {
+                                field.onChange(book._id)
+                                setBookPopoverOpen(false)
+                              }}
+                            >
+                              {book.title} - {book.author}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>
