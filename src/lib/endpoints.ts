@@ -9,6 +9,7 @@ export class Endpoints {
     LOGOUT: `${BASE_URL}/auth/logout`,
     REFRESH: `${BASE_URL}/auth/refresh`,
     CHANGE_PASSWORD_FIRST_TIME: `${BASE_URL}/auth/change-password-first-time`,
+    VERIFY_EMAIL: (token: string) => `${BASE_URL}/auth/verify-email?token=${token}`,
   }
   static readonly Fine = {
     GET_ALL: `${BASE_URL}/fines`,

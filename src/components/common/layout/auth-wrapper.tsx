@@ -20,8 +20,9 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
     const token = localStorage.getItem(Constants.API_TOKEN_KEY);
     const isLoginPage = pathname === "/login";
     const isRegisterPage = pathname === "/register";
+    const isVerifyEmailPage = pathname === "/auth/verify-email";
     if (!token) {
-      if (!isLoginPage && !isRegisterPage) {
+      if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage) {
         replace("/login");
       }
       return;
@@ -31,7 +32,7 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
       const { exp } = jwtDecode<{ exp: number }>(token);
       if (Date.now() >= exp * 1000) {
         localStorage.removeItem(Constants.API_TOKEN_KEY);
-        if (!isLoginPage && !isRegisterPage) {
+        if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage) {
           replace("/login");
         }
       } else {
