@@ -60,7 +60,6 @@ import {
 } from "@/components/common/toast/toast"
 import { useSWRConfig } from "swr"
 import { Endpoints } from "@/lib/endpoints"
-import AddFine from "../fine/add"
 
 const PAGE_SIZE = 10
 

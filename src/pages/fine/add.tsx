@@ -29,11 +29,6 @@ interface Book {
   author: string;
 }
 
-interface BorrowRecord {
-  _id: string;
-  book_id: Book;
-  user_id: string;
-}
 
 const formSchema = z.object({
   user_id: z.string().min(1, "Vui lòng chọn hội viên"),
