@@ -21,8 +21,10 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
     const isLoginPage = pathname === "/login";
     const isRegisterPage = pathname === "/register";
     const isVerifyEmailPage = pathname === "/auth/verify-email";
+    const isForgotPassPage = pathname === "/forgotpass";
+    const isVerifyOTPPage = pathname === "/verifyotp";
     if (!token) {
-      if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage) {
+      if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage && !isForgotPassPage && !isVerifyOTPPage) {
         replace("/login");
       }
       return;
@@ -32,7 +34,7 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
       const { exp } = jwtDecode<{ exp: number }>(token);
       if (Date.now() >= exp * 1000) {
         localStorage.removeItem(Constants.API_TOKEN_KEY);
-        if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage) {
+        if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage && !isForgotPassPage && !isVerifyOTPPage) {
           replace("/login");
         }
       } else {

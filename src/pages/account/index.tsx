@@ -4,12 +4,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Constants } from "@/lib/constants"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
+import { useState } from "react"
+import { Edit, Save, X } from "lucide-react"
+import { useUpdateProfile } from "@/hooks/api/user/use-update-profile"
+import { showErrorToast, showSuccessToast } from "@/components/common/toast/toast"
+import { useSetAtom } from "jotai/react"
 
 export default function AccountPage() {
   const userData = useAtomValue(userInfoAtom)
+  const setUserAtom = useSetAtom(userInfoAtom)
+  const { updateProfile, loading: updateLoading } = useUpdateProfile()
+  const [isEditing, setIsEditing] = useState(false)
+  const [formData, setFormData] = useState({
+    full_name: userData?.full_name || "",
+    phone: userData?.phone || "",
+    email: userData?.email || "",
+  })
 
   if (!userData) {
     return (
@@ -31,10 +45,39 @@ export default function AccountPage() {
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Thông tin tài khoản</CardTitle>
-            <CardDescription>
-              Xem thông tin cá nhân của bạn
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl">Thông tin tài khoản</CardTitle>
+                <CardDescription>
+                  Xem thông tin cá nhân của bạn
+                </CardDescription>
+              </div>
+              <Button
+                variant={isEditing ? "outline" : "default"}
+                onClick={() => {
+                  if (isEditing) {
+                    setFormData({
+                      full_name: userData.full_name,
+                      phone: userData.phone,
+                      email: userData.email,
+                    })
+                  }
+                  setIsEditing(!isEditing)
+                }}
+              >
+                {isEditing ? (
+                  <>
+                    <X className="mr-2 h-4 w-4" />
+                    Hủy
+                  </>
+                ) : (
+                  <>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Chỉnh sửa
+                  </>
+                )}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -42,9 +85,10 @@ export default function AccountPage() {
                 <Label htmlFor="fullName">Họ và tên</Label>
                 <Input
                   id="fullName"
-                  value={userData.full_name}
-                  readOnly
-                  className="bg-gray-50"
+                  value={isEditing ? formData.full_name : userData.full_name}
+                  onChange={(e) => isEditing && setFormData({ ...formData, full_name: e.target.value })}
+                  readOnly={!isEditing}
+                  className={isEditing ? "" : "bg-gray-50"}
                 />
               </div>
 
@@ -53,9 +97,10 @@ export default function AccountPage() {
                 <Input
                   id="email"
                   type="email"
-                  value={userData.email}
-                  readOnly
-                  className="bg-gray-50"
+                  value={isEditing ? formData.email : userData.email}
+                  onChange={(e) => isEditing && setFormData({ ...formData, email: e.target.value })}
+                  readOnly={!isEditing}
+                  className={isEditing ? "" : "bg-gray-50"}
                 />
               </div>
 
@@ -63,9 +108,10 @@ export default function AccountPage() {
                 <Label htmlFor="phone">Số điện thoại</Label>
                 <Input
                   id="phone"
-                  value={userData.phone}
-                  readOnly
-                  className="bg-gray-50"
+                  value={isEditing ? formData.phone : userData.phone}
+                  onChange={(e) => isEditing && setFormData({ ...formData, phone: e.target.value })}
+                  readOnly={!isEditing}
+                  className={isEditing ? "" : "bg-gray-50"}
                 />
               </div>
 
@@ -146,6 +192,59 @@ export default function AccountPage() {
                     {userData.is_verified ? "Verified" : "Unverified"}
                   </Badge>
                 </div>
+              </div>
+            )}
+            
+            {isEditing && (
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setFormData({
+                      full_name: userData.full_name,
+                      phone: userData.phone,
+                      email: userData.email,
+                    })
+                    setIsEditing(false)
+                  }}
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Hủy
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      if (!userData?._id) {
+                        showErrorToast("Không tìm thấy thông tin người dùng")
+                        return
+                      }
+                      
+                      const response = await updateProfile(userData._id, formData)
+                      
+                      if (response.success) {
+                        // Update local user data
+                        const updatedUser = { ...userData, ...formData }
+                        setUserAtom(updatedUser)
+                        localStorage.setItem("userInfo", JSON.stringify(updatedUser))
+                        
+                        showSuccessToast("Cập nhật thông tin thành công!")
+                        setIsEditing(false)
+                      } else {
+                        showErrorToast(response.message || "Cập nhật thất bại")
+                      }
+                    } catch (error: any) {
+                      showErrorToast(
+                        error?.response?.data?.message ||
+                          error?.message ||
+                          "Có lỗi xảy ra khi cập nhật thông tin"
+                      )
+                    }
+                  }}
+                  disabled={updateLoading}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {updateLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                </Button>
               </div>
             )}
           </CardContent>

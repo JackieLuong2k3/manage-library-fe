@@ -118,6 +118,11 @@ export function LoginForm({
                     )}
                   />
                 </div>
+                <div className="flex flex-col">
+                  <Link href="/forgotpass" className="underline underline-offset-4">
+                    Quên mật khẩu
+                  </Link>
+                </div>
                 <div className="flex flex-col gap-3">
                   <Button
                     type="submit"
