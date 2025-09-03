@@ -25,6 +25,7 @@ import { useRouter } from "next/router"
 import Link from "next/link"
 import { ArrowLeft, Key, Mail } from "lucide-react"
 import dynamic from "next/dynamic"
+import { useVerifyResetOtp } from "@/hooks/api/auth/use-verify-reset-otp"
 
 const formSchema = z.object({
   otp: z.string().min(6, "Mã OTP phải có 6 ký tự").max(6, "Mã OTP phải có 6 ký tự"),
@@ -47,15 +48,11 @@ function VerifyOTPPage() {
     },
   })
 
+  const { verifyResetOtp } = useVerifyResetOtp()
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true)
-      // TODO: Implement verify OTP API call
-      console.log("Verify OTP:", values.otp, "for email:", email)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      await verifyResetOtp(String(email), values.otp)
       showSuccessToast("Xác thực OTP thành công!")
       // Redirect to reset password page
       router.push(`/reset-password?email=${encodeURIComponent(email as string)}&otp=${values.otp}`)
