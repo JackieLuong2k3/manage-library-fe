@@ -19,5 +19,5 @@ export const logout = () => {
   localStorage.removeItem(Constants.API_TOKEN_KEY)
   const store = getDefaultStore()
   store.set(userInfoAtom, RESET)
-  window.location.href = "/login"
+  window.location.href = "/auth/login"
 }

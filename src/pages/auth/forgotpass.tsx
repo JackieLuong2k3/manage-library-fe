@@ -56,7 +56,7 @@ function ForgotPasswordPage() {
       await forgotPassword(values.email)
       showSuccessToast("Email đặt lại mật khẩu đã được gửi!")
       // Redirect to verify OTP page with email as query parameter
-      router.push(`/verifyotp?email=${encodeURIComponent(values.email)}`)
+      router.push(`auth/verifyotp?email=${encodeURIComponent(values.email)}`)
     } catch (error: any) {
       showErrorToast(
         error?.response?.data?.message ||
@@ -87,7 +87,7 @@ function ForgotPasswordPage() {
             </div>
             <div className="flex flex-col gap-2">
               <Button asChild>
-                <Link href="/login">
+                <Link href="/auth/login">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Quay lại đăng nhập
                 </Link>
@@ -144,7 +144,7 @@ function ForgotPasswordPage() {
           </Form>
           <div className="mt-4 text-center">
             <Link
-              href="/login"
+              href="/auth/login"
               className="text-sm text-muted-foreground hover:underline"
             >
               <ArrowLeft className="mr-1 h-3 w-3 inline" />

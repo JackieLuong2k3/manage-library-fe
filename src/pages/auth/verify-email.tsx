@@ -47,7 +47,7 @@ export default function VerifyEmailPage() {
             <div className="space-y-4">
               <p className="text-green-600">{message}</p>
               <Button asChild>
-                <Link href="/login">Đăng nhập</Link>
+                <Link href="/auth/login">Đăng nhập</Link>
               </Button>
             </div>
           )}

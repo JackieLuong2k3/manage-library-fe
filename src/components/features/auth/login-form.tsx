@@ -119,7 +119,7 @@ export function LoginForm({
                   />
                 </div>
                 <div className="flex flex-col">
-                  <Link href="/forgotpass" className="underline underline-offset-4">
+                  <Link href="/auth/forgotpass" className="underline underline-offset-4">
                     Quên mật khẩu
                   </Link>
                 </div>
@@ -138,7 +138,7 @@ export function LoginForm({
               </div>
               <div className="mt-4 text-center text-sm">
                 Bạn chưa có tài khoản?{" "}
-                <Link href="/register" className="underline underline-offset-4">
+                <Link href="/auth/register" className="underline underline-offset-4">
                   Đăng ký ngay
                 </Link>
               </div>

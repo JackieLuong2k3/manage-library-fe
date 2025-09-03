@@ -18,14 +18,15 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
 
   useEffect(() => {
     const token = localStorage.getItem(Constants.API_TOKEN_KEY);
-    const isLoginPage = pathname === "/login";
-    const isRegisterPage = pathname === "/register";
+    const isLoginPage = pathname === "/auth/login";
+    const isRegisterPage = pathname === "/auth/register";
     const isVerifyEmailPage = pathname === "/auth/verify-email";
-    const isForgotPassPage = pathname === "/forgotpass";
-    const isVerifyOTPPage = pathname === "/verifyotp";
+    const isForgotPassPage = pathname === "/auth/forgotpass";
+    const isVerifyOTPPage = pathname === "/auth/verifyotp";
+    const isResetPasswordPage = pathname === "/auth/reset-password";
     if (!token) {
-      if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage && !isForgotPassPage && !isVerifyOTPPage) {
-        replace("/login");
+      if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage && !isForgotPassPage && !isVerifyOTPPage && !isResetPasswordPage) {
+        replace("/auth/login");
       }
       return;
     }
@@ -34,8 +35,8 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
       const { exp } = jwtDecode<{ exp: number }>(token);
       if (Date.now() >= exp * 1000) {
         localStorage.removeItem(Constants.API_TOKEN_KEY);
-        if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage && !isForgotPassPage && !isVerifyOTPPage) {
-          replace("/login");
+        if (!isLoginPage && !isRegisterPage && !isVerifyEmailPage && !isForgotPassPage && !isVerifyOTPPage && !isResetPasswordPage) {
+          replace("/auth/login");
         }
       } else {
         if (isLoginPage || isRegisterPage) {

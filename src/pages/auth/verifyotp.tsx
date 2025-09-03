@@ -55,7 +55,7 @@ function VerifyOTPPage() {
       await verifyResetOtp(String(email), values.otp)
       showSuccessToast("Xác thực OTP thành công!")
       // Redirect to reset password page
-      router.push(`/reset-password?email=${encodeURIComponent(email as string)}&otp=${values.otp}`)
+      router.push(`/auth/reset-password?email=${encodeURIComponent(email as string)}&otp=${values.otp}`)
     } catch (error: any) {
       showErrorToast(
         error?.response?.data?.message ||
@@ -105,7 +105,7 @@ function VerifyOTPPage() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/forgotpass">
+              <Link href="/auth/forgotpass">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Quay lại trang quên mật khẩu
               </Link>
