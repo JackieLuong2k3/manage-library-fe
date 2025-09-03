@@ -10,6 +10,9 @@ export class Endpoints {
     REFRESH: `${BASE_URL}/auth/refresh`,
     CHANGE_PASSWORD_FIRST_TIME: `${BASE_URL}/auth/change-password-first-time`,
     VERIFY_EMAIL: (token: string) => `${BASE_URL}/auth/verify-email?token=${token}`,
+    FORGOT_PASSWORD: `${BASE_URL}/auth/forgot-password`,
+    VERIFY_OTP: `${BASE_URL}/auth/verify-reset-otp`,
+    RESET_PASSWORD: `${BASE_URL}/auth/reset-password`,
   }
   static readonly Fine = {
     GET_ALL: `${BASE_URL}/fines`,

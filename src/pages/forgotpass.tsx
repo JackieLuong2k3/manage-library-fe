@@ -25,6 +25,7 @@ import { useRouter } from "next/router"
 import Link from "next/link"
 import { ArrowLeft, Mail } from "lucide-react"
 import dynamic from "next/dynamic"
+import { useForgotPassword } from "@/hooks/api/auth/use-forgot-password"
 
 const formSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -40,6 +41,7 @@ function ForgotPasswordPage() {
     setMounted(true)
   }, [])
 
+  const { forgotPassword } = useForgotPassword()
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,12 +53,7 @@ function ForgotPasswordPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true)
-      // TODO: Implement forgot password API call
-      console.log("Forgot password for:", values.email)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      await forgotPassword(values.email)
       showSuccessToast("Email đặt lại mật khẩu đã được gửi!")
       // Redirect to verify OTP page with email as query parameter
       router.push(`/verifyotp?email=${encodeURIComponent(values.email)}`)
