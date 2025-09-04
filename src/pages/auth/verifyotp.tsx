@@ -26,6 +26,7 @@ import Link from "next/link"
 import { ArrowLeft, Key, Mail } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useVerifyResetOtp } from "@/hooks/api/auth/use-verify-reset-otp"
+import { useForgotPassword } from "@/hooks/api/auth/use-forgot-password"
 
 const formSchema = z.object({
   otp: z.string().min(6, "Mã OTP phải có 6 ký tự").max(6, "Mã OTP phải có 6 ký tự"),
@@ -47,7 +48,7 @@ function VerifyOTPPage() {
       otp: "",
     },
   })
-
+  const { forgotPassword } = useForgotPassword()
   const { verifyResetOtp } = useVerifyResetOtp()
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -115,7 +116,12 @@ function VerifyOTPPage() {
       </div>
     )
   }
+  const handleResendOtp = async () => {
+    const response = await forgotPassword(email as string)
 
+        // TODO: Implement resend OTP
+        showSuccessToast(response.message)
+  }
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="max-w-md w-full">
@@ -162,14 +168,13 @@ function VerifyOTPPage() {
               Không nhận được mã OTP?
             </div>
             <Button variant="outline" className="w-full" onClick={() => {
-              // TODO: Implement resend OTP
-              showSuccessToast("Đã gửi lại mã OTP!")
+              handleResendOtp()
             }}>
               Gửi lại mã OTP
             </Button>
             <div className="text-center">
               <Link
-                href="/forgotpass"
+                href="/auth/forgotpass"
                 className="text-sm text-muted-foreground hover:underline"
               >
                 <ArrowLeft className="mr-1 h-3 w-3 inline" />

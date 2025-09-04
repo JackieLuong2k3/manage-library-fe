@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -35,11 +34,7 @@ function ForgotPasswordPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const { forgotPassword } = useForgotPassword()
   
@@ -56,7 +51,7 @@ function ForgotPasswordPage() {
       await forgotPassword(values.email)
       showSuccessToast("Email đặt lại mật khẩu đã được gửi!")
       // Redirect to verify OTP page with email as query parameter
-      router.push(`auth/verifyotp?email=${encodeURIComponent(values.email)}`)
+      router.push(`/auth/verifyotp?email=${encodeURIComponent(values.email)}`)
     } catch (error: any) {
       showErrorToast(
         error?.response?.data?.message ||
