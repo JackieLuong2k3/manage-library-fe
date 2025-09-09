@@ -1,5 +1,5 @@
-const BASE_URL = "http://localhost:5678/api"
-// const BASE_URL = "https://manage-library-be.onrender.com/api"
+// const BASE_URL = "http://localhost:5678/api"
+const BASE_URL = "https://manage-library-be.onrender.com/api"
 
 
 export class Endpoints {
